@@ -34,9 +34,9 @@ Create table BOOK_LOANS (
 Loan_id int, 
 Isbn char(10), 
 Card_id char(11), 
-Date_out varchar(20),
-Due_Date varchar(20),
-Date_in varchar(20),
+Date_out Date,
+Due_Date Date,
+Date_in Date,
 constraint pkLoan_Id primary key (Loan_id),
 constraint fkBLoanIsbn foreign key (Isbn) references BOOK(Isbn),
 constraint fkCard_id foreign key (Card_id) references BORROWER(Card_id));
