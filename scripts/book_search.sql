@@ -9,6 +9,7 @@ FROM BOOK AS B
 LEFT JOIN BOOK_AUTHORS AS BA ON B.Isbn = BA.Isbn
 LEFT JOIN AUTHORS AS A ON BA.Author_id = A.Author_id
 LEFT JOIN BOOK_LOANS AS BL ON B.Isbn = BL.Isbn
-WHERE B.Title LIKE '%rh%'
-   OR A.Name LIKE '%rh%';
--- substring can be substituted for any text entered into the search field
+WHERE B.Isbn LIKE '%substring%' 
+   OR B.Title LIKE '%substring%'
+   OR A.Name LIKE '%substring%';
+-- substring can be updated to any search query text
