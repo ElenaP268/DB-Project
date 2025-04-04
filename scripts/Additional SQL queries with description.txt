@@ -1,0 +1,47 @@
+Return all borrowers with the given SSN, used for checking if someone already has a card.
+	SELECT *
+	FROM Borrower
+	WHERE Ssn = '123-12-1234"
+
+Add a new borrower with the given information.
+	INSERT INTO Borrower (Card_id, Ssn, Bname, Address, Phone)
+	VALUES ('ID001001', '123-12-1234', 'Name', 'Address', '0123456789');
+
+Return the borrower ID with the highest number, used in the process of creating a unique ID for a new user.
+	SELECT Card_id
+	FROM Borrower
+	ORDER BY Card_ID DESC
+	LIMIT 1;
+
+Return a variety of information used to calculate the fines: the interval from the due date to today, the interval from the due date to the date in (if null, the book is still out), the fine amount, and whether the fine is paid.
+	SELECT DATEDIFF(CURRENT_DATE(), Due_date) AS interval_to_today, DATEDIFF(Date_in, Due_date) AS interval_to_date_in, B.Loan_id, Fine_amt, Paid
+	FROM Book_Loans B LEFT JOIN Fines F ON B.Loan_id = F.Loan_id;
+
+Add a new fine with the given values; the 0 indicates an unpaid fine.
+	INSERT INTO Fines (Loan_id, Fine_amt, Paid)
+	VALUES (1, 1.50, 0);
+
+Update an existing fine of a given ID with a new value.
+	UPDATE Fines
+	SET Fine_amt = 1.50
+	WHERE Loan_id = 1;
+
+Return all unpaid fines, group by library card.
+	SELECT Card_id, SUM(Fine_amt)
+	FROM Book_Loans NATURAL JOIN Fines
+	WHERE Paid IS FALSE
+	GROUP BY Card_id;
+
+Return all unreturned loans for a given user, used to determine if a fine is eligible to be repaid (no paying back a fine when a book is still out).
+	SELECT Loan_id	
+	FROM Book_loans
+	WHERE Card_id = 'ID001001' AND Date_in IS NULL;
+
+Mark all fines as payed for a given ID.
+	UPDATE Fines
+	SET Paid = TRUE
+	WHERE Loan_id IN(
+		SELECT Loan_id
+		FROM Book_Loans
+		WHERE Card_id = 'ID001001'
+		);
