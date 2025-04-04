@@ -1,5 +1,6 @@
 # DB-Project
-
+- Put all CSV files into the file path (ex: C:\db_project\data\example.csv)
+- Run the Library_DB_DataLoad file
 How to load the data:
 1. Go to Services in your windows laptop and stop the MySQL service.
 2. Go to the MySQL installation folder. This will something like C:\ProgramData\MySQL\MySQL Server <version>
