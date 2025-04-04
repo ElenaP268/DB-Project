@@ -136,4 +136,46 @@ public class LibraryManagement {
 
         st2.executeUpdate();
     }
+
+    public static void search(Connection conn, String arg) throws SQLException{
+        ResultSet rs;
+        if(arg.length() == 10 && arg.matches("\\d{9}[\\dX]")) { // Full ISBN match
+            String potISBN = arg.replaceAll("-", "");
+            String query =  "SELECT b.Isbn, b.Title, a.Name AS Author, bl.Date_out, bl.Date_in " +
+                            "FROM Book b " +
+                            "INNER JOIN Book_Authors ba ON b.Isbn = Book_Authors.Isbn " +
+                            "INNER JOIN Authors a ON ba.Author_id = a.Author_id " +
+                            "INNER JOIN Book_Loans bl ON b.Isbn = bl.Isbn " +
+                            "WHERE b.Isbn = " + potISBN + ' ' +
+                            "LIMIT 1;";
+            PreparedStatement st = conn.prepareStatement(query);
+            rs = st.executeQuery();
+        }
+        else { // Not an ISBN
+            String query =  "SELECT b.Isbn, b.Title, a.Name AS Author, bl.Date_out, bl.Date_in " +
+                            "FROM Book b " +
+                            "INNER JOIN Book_Authors ba ON b.Isbn = ba.Isbn " +
+                            "INNER JOIN Authors a ON ba.Author_id = a.Author_id " +
+                            "INNER JOIN Book_Loans bl ON b.Isbn = bl.Isbn " +
+                            "WHERE UPPER(b.Isbn) LIKE UPPER(?) " + //partial isbns
+                            "OR UPPER(b.Title) LIKE UPPER(?) " +
+                            "OR UPPER(a.Name) LIKE UPPER(?);";
+            PreparedStatement st = conn.prepareStatement(query);
+            st.setString(1, arg);
+            st.setString(2, arg);
+            st.setString(3, arg);
+            rs = st.executeQuery();
+        }
+        int counter = 0;
+        System.out.printf("%-5s%-12s%-35s%-35s%-5s\n","NO", "ISBN", "TITLE", "AUTHOR(S)", "STATUS");
+        while(rs.next()) {
+            int isbn = rs.getInt(1);
+            String title = rs.getString(2);
+            String authors = rs.getString(3);
+            Date date_out = rs.getDate(4);
+            Date date_in = rs.getDate(5);
+            String status = date_out.equals(null) ? "IN" : "OUT";
+            System.out.printf("%-5s%-12s%-35s%-35s%-5s\n",String.format("%02d", counter), isbn, title, authors, status);
+        }
+    }
 }
