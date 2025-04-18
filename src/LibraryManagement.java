@@ -10,6 +10,36 @@ public class LibraryManagement {
         Connection conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
 
         // GUI goes here
+        search(conn, "Williamson");
+    }
+
+    public static void search(Connection conn, String searchTerm) throws SQLException {
+        searchTerm = "%" + searchTerm + "%";
+        String query = "SELECT B.Isbn AS ISBN, B.Title AS TITLE, A.Name AS AUTHORS, "+
+                        "CASE WHEN BL.Date_in IS NULL THEN 'Checked Out' ELSE 'Available' END AS STATUS "+
+                        "FROM BOOK AS B LEFT JOIN BOOK_AUTHORS AS BA ON B.Isbn = BA.Isbn "+
+                        "LEFT JOIN AUTHORS AS A ON BA.Author_id = A.Author_id "+
+                        "LEFT JOIN BOOK_LOANS AS BL ON B.Isbn = BL.Isbn "+
+                        "WHERE B.Isbn LIKE ? OR B.Title LIKE ? OR A.Name LIKE ?;";
+
+        PreparedStatement st = conn.prepareStatement(query);
+
+        st.setString(1, searchTerm);
+        st.setString(2, searchTerm);
+        st.setString(3, searchTerm);
+
+        ResultSet rs = st.executeQuery();
+
+        // REPLACE print statements with GUI integration
+        System.out.println("ISBN\tTITLE\tAUTHORS\tSTATUS");
+        while (rs.next()) {
+            String isbn = rs.getString("ISBN");
+            String title = rs.getString("TITLE");
+            String authors = rs.getString("AUTHORS");
+            String status = rs.getString("STATUS");
+
+            System.out.println(isbn + "\t" + title + "\t" + authors + "\t" + status);
+        }
     }
 
     public static void addBorrower(Connection conn, String name, String ssn, String address) throws SQLException {
