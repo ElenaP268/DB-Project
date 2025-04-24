@@ -23,8 +23,11 @@ public abstract class ListRow {
         return null;
     }
 
+    public String getBorrowerID() {
+        return null;
+    }
+
     public boolean checked() {
         return isChecked;
     }
 }
-
