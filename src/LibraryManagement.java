@@ -292,6 +292,13 @@ public class LibraryManagement {
         return searchResult;
     }
 
+    public static void payFinesFromSearch(Connection conn, ArrayList<ListRow> searchResult) throws SQLException {
+        for (ListRow row : searchResult) {
+            if (row.checked())
+                payFines(conn, row.getBorrowerID());
+        }
+    }
+
     public static void payFines(Connection conn, String cardID) throws SQLException {
         String query = "SELECT Loan_id FROM Book_loans WHERE Card_id = ? AND Date_in IS NULL;";
 
