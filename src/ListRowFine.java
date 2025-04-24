@@ -8,6 +8,10 @@ public class ListRowFine extends ListRow {
         totalFines = newTotalFines;
     }
 
+    public String getBorrowerID() {
+        return id;
+    }
+
     public void printHeader() {
         System.out.println("ID Number\tTotal Fines");    }
 
