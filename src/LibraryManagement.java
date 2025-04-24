@@ -12,19 +12,21 @@ public class LibraryManagement {
         ArrayList<ListRow> searchResult;
 
         // GUI goes here
-        searchResult = search(conn, "Williamson");
-        printTable(searchResult);
-
-        searchResult = displayFines(conn);
-        printTable(searchResult);
-
-//        searchResult = loanSearch(conn, "100");
+//        searchResult = search(conn, "Williamson");
 //        printTable(searchResult);
-
+//
+//        searchResult = displayFines(conn);
+//        printTable(searchResult);
+//
+//        searchResult = loanSearch(conn, "ID001001");
+//        printTable(searchResult);
     }
 
     public static void printTable (ArrayList<ListRow> searchResult) {
-        if (searchResult != null) {
+        if (searchResult.isEmpty()) {
+            System.out.println("No records found.");
+        }
+        else {
             searchResult.getFirst().printHeader();
             for (ListRow row : searchResult) {
                 row.printRow();
@@ -176,7 +178,7 @@ public class LibraryManagement {
     }
 
     public static String getBorrowerID() {
-        String borrowerID = "ID001001";
+        String borrowerID = "ID001002";
         //prompt user for borrower ID
         return borrowerID;
     }
@@ -220,11 +222,11 @@ public class LibraryManagement {
     public static void checkInFromSearch(Connection conn, ArrayList<ListRow> searchResult) throws SQLException {
         for (ListRow row : searchResult) {
             if (row.checked())
-                checkIn(conn, Integer.parseInt(row.getLoanID()));
+                checkIn(conn, row.getLoanID());
         }
     }
 
-    public static void checkIn(Connection conn, int loanID) throws SQLException {
+    public static void checkIn(Connection conn, String loanID) throws SQLException {
         String query = "UPDATE BOOK_LOANS SET Date_in = CURRENT_DATE WHERE Loan_id = " + loanID + " AND Date_in IS NULL;";
         Statement st = conn.createStatement();
         st.executeUpdate(query);
