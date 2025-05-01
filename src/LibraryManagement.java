@@ -27,7 +27,7 @@ public class LibraryManagement {
             System.out.println("No records found.");
         }
         else {
-            searchResult.getFirst().printHeader();
+            searchResult.get(0).printHeader();
             for (ListRow row : searchResult) {
                 row.printRow();
             }

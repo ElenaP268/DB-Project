@@ -18,11 +18,20 @@ public class ListRowBook extends ListRow {
         System.out.println("ISBN\tTITLE\tAUTHORS\tSTATUS");
     }
 
+    public String getHeader() {
+        return "ISBN\tTITLE\tAUTHORS\tSTATUS\tBORROWER ID";
+    }
+
     public String getIsbn() {
         return isbn;
     }
 
     public void printRow() {
         System.out.println(isbn + "\t" + title + "\t" + author + "\t" + status + "\t" + borrowerID);
+    }
+
+    @Override
+    public String toString() {
+        return isbn + "\t" + title + "\t" + author + "\t" + status + "\t" + borrowerID;
     }
 }
