@@ -53,9 +53,25 @@ public class LibraryManagement {
         ResultSet rs = st.executeQuery();
 
         ArrayList<ListRow> searchResult = new ArrayList<>();
+        String prevIsbn = null;
 
         while (rs.next()) {
-            searchResult.add(new ListRowBook(rs.getString("ISBN"), rs.getString("TITLE"),rs.getString("AUTHORS"), rs.getString("STATUS"), rs.getString("BORROWER")));
+            String isbn = rs.getString("ISBN");
+            if (!isbn.equals(prevIsbn)) {
+                query = "SELECT A.Name FROM BOOK AS B LEFT JOIN BOOK_AUTHORS AS BA ON B.Isbn = BA.Isbn LEFT JOIN AUTHORS AS A ON BA.Author_id = A.Author_id  WHERE B.ISBN = ? ;";
+                PreparedStatement st2 = conn.prepareStatement(query);
+                st2.setString(1, isbn );
+                ResultSet rs2 = st2.executeQuery();
+
+                rs2.next();
+                StringBuilder authors = new StringBuilder(rs2.getString("Name"));
+                while (rs2.next()) {
+                    authors.append(", ").append(rs2.getString("Name"));
+                }
+
+                searchResult.add(new ListRowBook(isbn, rs.getString("TITLE"), authors.toString(), rs.getString("STATUS"), rs.getString("BORROWER")));
+                prevIsbn = isbn;
+            }
         }
 
         return searchResult;
@@ -141,7 +157,7 @@ public class LibraryManagement {
 
         for (ListRow row : searchResult) {
             if (row.checked())
-                checkout(conn, row.getIsbn(), borrowerID);
+                checkout(conn, row.getKey(), borrowerID);
         }
     }
 
@@ -222,7 +238,7 @@ public class LibraryManagement {
     public static void checkInFromSearch(Connection conn, ArrayList<ListRow> searchResult) throws SQLException {
         for (ListRow row : searchResult) {
             if (row.checked())
-                checkIn(conn, row.getLoanID());
+                checkIn(conn, row.getKey());
         }
     }
 
@@ -295,7 +311,7 @@ public class LibraryManagement {
     public static void payFinesFromSearch(Connection conn, ArrayList<ListRow> searchResult) throws SQLException {
         for (ListRow row : searchResult) {
             if (row.checked())
-                payFines(conn, row.getBorrowerID());
+                payFines(conn, row.getKey());
         }
     }
 
