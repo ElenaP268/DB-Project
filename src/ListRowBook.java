@@ -22,7 +22,7 @@ public class ListRowBook extends ListRow {
         return "ISBN\tTITLE\tAUTHORS\tSTATUS\tBORROWER ID";
     }
 
-    public String getIsbn() {
+    public String getKey() {
         return isbn;
     }
 
