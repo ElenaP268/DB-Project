@@ -16,7 +16,7 @@ public class ListRowLoan extends ListRow {
         name = newName;
     }
 
-    public String getLoanID() {
+    public String getKey() {
         return id;
     }
 
