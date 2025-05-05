@@ -15,15 +15,7 @@ public abstract class ListRow {
     public void printRow() {
     }
 
-    public String getIsbn() {
-        return null;
-    }
-
-    public String getLoanID() {
-        return null;
-    }
-
-    public String getBorrowerID() {
+    public String getKey() {
         return null;
     }
 
