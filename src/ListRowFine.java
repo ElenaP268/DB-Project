@@ -8,7 +8,7 @@ public class ListRowFine extends ListRow {
         totalFines = newTotalFines;
     }
 
-    public String getBorrowerID() {
+    public String getKey() {
         return id;
     }
 
