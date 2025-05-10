@@ -72,6 +72,10 @@ public class LibraryGUI {
             JOptionPane.showMessageDialog(frame, "Failed to connect to the database. Error:" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        JScrollPane scrollPane = new JScrollPane(resultTable);
+        panel1.add(scrollPane, BorderLayout.CENTER);
+        JLabel noDataLabel = new JLabel("No record found", SwingConstants.CENTER);
+        resultTable.setModel(new DefaultTableModel(new String[][]{}, ListRowBook.getHeaderColumnNames()));
 
         searchButton.addActionListener(new ActionListener() {
             @Override
@@ -81,18 +85,13 @@ public class LibraryGUI {
                     JOptionPane.showMessageDialog(frame, "Please enter a search term.", "Warning", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-        
+                resultTable.setModel(new DefaultTableModel(new String[][]{}, ListRowBook.getHeaderColumnNames()));
                 try {
                     // Call the search method and display results
                     ArrayList<ListRow> searchResult = LibraryManagement.search(conn, searchTerm);
-                    resultArea.setText(""); // Clear previous results
-                    resultTable.setModel(new DefaultTableModel());
                     if (searchResult.isEmpty()) {
-                        JLabel noDataLabel = new JLabel("No record found", SwingConstants.CENTER);
-                        panel1.add(noDataLabel, BorderLayout.CENTER);
-                        resultTable.setVisible(false);
-                        resultArea.setVisible(true);
-                        frame.repaint();
+                        JOptionPane.showMessageDialog(frame, "No Records Found for the search criteria", "No Records Found", JOptionPane.INFORMATION_MESSAGE);
+
                     } else {
                         // Append the header to the result area
                         String[][] tableData = new String[searchResult.size()][5];
@@ -102,13 +101,13 @@ public class LibraryGUI {
                             index++;
                         }
 
-                        resultTable.setModel(new DefaultTableModel(tableData, ((ListRowBook)searchResult.getFirst()).getHeaderColumnNames()));
-                        JScrollPane scrollPane = new JScrollPane(resultTable);
-                        panel1.add(scrollPane, BorderLayout.CENTER);
+                        resultTable.setModel(new DefaultTableModel(tableData, ListRowBook.getHeaderColumnNames()));
+                        noDataLabel.setVisible(false);
                         resultTable.setVisible(true);
-                        resultArea.setVisible(false);
-                        frame.setVisible(true);
                     }
+                    panel1.revalidate();
+                    panel1.repaint();
+                    frame.repaint();
                 } catch (SQLException ex) {
                     JOptionPane.showMessageDialog(frame, "Error executing search: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }

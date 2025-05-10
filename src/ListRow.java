@@ -5,6 +5,8 @@ public abstract class ListRow {
     protected Boolean isChecked;
     protected List<String> columnValues = new ArrayList<>();
 
+    protected static String columnHeaders = "";
+
     public ListRow () {
         isChecked = false;
     }

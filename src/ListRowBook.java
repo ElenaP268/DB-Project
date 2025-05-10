@@ -8,6 +8,8 @@ public class ListRowBook extends ListRow {
     private final String status;
     private final String borrowerID;
 
+    protected static String columnHeaders = "ISBN\tTITLE\tAUTHORS\tSTATUS\tBORROWER ID";
+
     public ListRowBook(String newIsbn, String newTitle, String newAuthor, String newStatus, String newBorrowerID) {
         super();
         isbn = newIsbn;
@@ -23,11 +25,11 @@ public class ListRowBook extends ListRow {
     }
 
     public String getHeader() {
-        return "ISBN\tTITLE\tAUTHORS\tSTATUS\tBORROWER ID";
+        return columnHeaders;
     }
 
-    public String[] getHeaderColumnNames() {
-        return getHeader().split("\t");
+    public static String[] getHeaderColumnNames() {
+        return columnHeaders.split("\t");
     }
 
     public String getKey() {
