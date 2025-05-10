@@ -1,3 +1,6 @@
+import java.util.Arrays;
+import java.util.List;
+
 public class ListRowBook extends ListRow {
     private final String isbn;
     private final String title;
@@ -12,6 +15,7 @@ public class ListRowBook extends ListRow {
         author = newAuthor;
         status = newStatus;
         borrowerID = newBorrowerID;
+        columnValues.addAll(List.of(isbn, title, author, status, (borrowerID == null ? "null": borrowerID) ));
     }
 
     public void printHeader() {
@@ -20,6 +24,10 @@ public class ListRowBook extends ListRow {
 
     public String getHeader() {
         return "ISBN\tTITLE\tAUTHORS\tSTATUS\tBORROWER ID";
+    }
+
+    public String[] getHeaderColumnNames() {
+        return getHeader().split("\t");
     }
 
     public String getKey() {
@@ -34,4 +42,6 @@ public class ListRowBook extends ListRow {
     public String toString() {
         return isbn + "\t" + title + "\t" + author + "\t" + status + "\t" + borrowerID;
     }
+
+
 }

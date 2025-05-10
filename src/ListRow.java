@@ -1,5 +1,9 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class ListRow {
     protected Boolean isChecked;
+    protected List<String> columnValues = new ArrayList<>();
 
     public ListRow () {
         isChecked = false;
@@ -21,5 +25,9 @@ public abstract class ListRow {
 
     public boolean checked() {
         return isChecked;
+    }
+
+    public String[] getColumnsValues () {
+        return columnValues.toArray(new String[0]);
     }
 }
