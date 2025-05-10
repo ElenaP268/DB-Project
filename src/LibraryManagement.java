@@ -83,12 +83,12 @@ public class LibraryManagement {
         addBorrower(conn, name, ssn, address, null);
     }
 
-    public static void addBorrower(Connection conn, String name, String ssn, String address, String phone) throws SQLException {
+    public static String addBorrower(Connection conn, String name, String ssn, String address, String phone) throws SQLException {
         Statement st = conn.createStatement();
         ResultSet rs = st.executeQuery("SELECT * FROM Borrower WHERE Ssn = '" + ssn + "'");
         if (rs.next()) { // Non-empty result
             printError("Borrower already has a library card.");
-            return;
+            return "Error: Borrower already has a library card.";
         }
 
         String id = generateBorrowerID(conn);
@@ -101,6 +101,7 @@ public class LibraryManagement {
         pst.setString(5, phone);
 
         pst.executeUpdate();
+        return id;
     }
 
     public static String generateBorrowerID(Connection conn) throws SQLException {
