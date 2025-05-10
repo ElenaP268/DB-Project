@@ -50,27 +50,7 @@ public class LibraryGUI {
         frame.add(tabbedPane, BorderLayout.CENTER);
 
 
-        tabbedPane.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                int selectedIndex = tabbedPane.getSelectedIndex();
-                switch (selectedIndex) {
-                    case 0: libraryGUI.show(panel1);
-                        break;
-                    case 1:
-                        bookLoansGui.show();
-                        break;
-                    case 2:
-                        borrowerManagementGUI.show();
-                        break;
-                    case 3:
-                        finesGUI.show();
-                        break;
-                    default: libraryGUI.show(panel1);
-                        break;
-                }
-            }
-        });
+
         libraryGUI.show(panel1);
         // Make the frame visible
         frame.setVisible(true);

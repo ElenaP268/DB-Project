@@ -17,7 +17,11 @@ public class BorrowerManagementGUI  {
     public BorrowerManagementGUI(JPanel jPanel, Connection conn) {
         this.borrowerManagementPanel = jPanel;
         this.conn = conn;
-
+        try {
+            loadAllControls();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
@@ -27,6 +31,7 @@ public class BorrowerManagementGUI  {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
+        borrowerManagementPanel.repaint();
     }
 
     private void loadAllControls() throws ParseException {
