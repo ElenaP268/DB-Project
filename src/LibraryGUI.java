@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -8,29 +10,74 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class LibraryGUI {
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/Library";
-    private static final String USERNAME = "root";
-    private static final String PASSWORD = "Ch1ttm$bi"; // Replace with your actual password
+import static java.lang.System.exit;
 
+public class LibraryGUI {
+
+    private static Connection conn;
     public static void main(String[] args) {
-        // Create the main frame
         JFrame frame = new JFrame("Library Management System");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
+        // Set up the database connection
+
+        try {
+            conn = DriverManager.getConnection(Config.DB_URL, Config.USERNAME, Config.PASSWORD);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(frame, "Failed to connect to the database. Error:" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            exit(999);
+        }
+
+        // Create the main frame
+
 
         JTabbedPane tabbedPane = new JTabbedPane();
         JPanel panel1 = new JPanel(new BorderLayout());
+        LibraryGUI libraryGUI = new LibraryGUI();
 
         tabbedPane.add("Book Search and Availability", panel1);
-        JPanel panel2 = new JPanel(new BorderLayout());
+        JPanel panel2 = new JPanel();
         tabbedPane.add("Book Loans", panel2);
+        BookLoansGui bookLoansGui = new BookLoansGui(panel2, conn);
 
         JPanel panel3 = new JPanel(new BorderLayout());
         tabbedPane.add("Borrower Management", panel3);
+        BorrowerManagementGUI borrowerManagementGUI = new BorrowerManagementGUI(panel3, conn);
+
         JPanel panel4 = new JPanel(new BorderLayout());
         tabbedPane.add("Fines", panel4);
+        FinesGUI finesGUI = new FinesGUI(panel4, conn);
+        frame.add(tabbedPane, BorderLayout.CENTER);
 
+
+        tabbedPane.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                int selectedIndex = tabbedPane.getSelectedIndex();
+                switch (selectedIndex) {
+                    case 0: libraryGUI.show(panel1);
+                        break;
+                    case 1:
+                        bookLoansGui.show();
+                        break;
+                    case 2:
+                        borrowerManagementGUI.show();
+                        break;
+                    case 3:
+                        finesGUI.show();
+                        break;
+                    default: libraryGUI.show(panel1);
+                        break;
+                }
+            }
+        });
+        libraryGUI.show(panel1);
+        // Make the frame visible
+        frame.setVisible(true);
+        frame.repaint();
+    }
+
+    public void show(JPanel mainPanel) {
         // Create a panel for user input
         JPanel panel = new JPanel(new BorderLayout());
 
@@ -54,26 +101,19 @@ public class LibraryGUI {
 
         panel.add(searchButton, BorderLayout.EAST);
         panel.setSize(800, 100);
-        panel1.add(panel, BorderLayout.NORTH);
+        mainPanel.add(panel, BorderLayout.NORTH);
         // Add the panel to the frame
         //frame.add(panel, BorderLayout.NORTH);
-        frame.add(tabbedPane, BorderLayout.CENTER);
+
         JTable resultTable = new JTable();
         // Create a text area to display results
         JTextArea resultArea = new JTextArea();
 
         resultArea.setEditable(false);
 
-        // Set up the database connection
-        Connection conn;
-        try {
-            conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(frame, "Failed to connect to the database. Error:" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+
         JScrollPane scrollPane = new JScrollPane(resultTable);
-        panel1.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
         JLabel noDataLabel = new JLabel("No record found", SwingConstants.CENTER);
         resultTable.setModel(new DefaultTableModel(new String[][]{}, ListRowBook.getHeaderColumnNames()));
 
@@ -82,7 +122,7 @@ public class LibraryGUI {
             public void actionPerformed(ActionEvent e) {
                 String searchTerm = searchField.getText();
                 if (searchTerm.isEmpty()) {
-                    JOptionPane.showMessageDialog(frame, "Please enter a search term.", "Warning", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(mainPanel, "Please enter a search term.", "Warning", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
                 resultTable.setModel(new DefaultTableModel(new String[][]{}, ListRowBook.getHeaderColumnNames()));
@@ -90,7 +130,7 @@ public class LibraryGUI {
                     // Call the search method and display results
                     ArrayList<ListRow> searchResult = LibraryManagement.search(conn, searchTerm);
                     if (searchResult.isEmpty()) {
-                        JOptionPane.showMessageDialog(frame, "No Records Found for the search criteria", "No Records Found", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(mainPanel, "No Records Found for the search criteria", "No Records Found", JOptionPane.INFORMATION_MESSAGE);
 
                     } else {
                         // Append the header to the result area
@@ -105,16 +145,15 @@ public class LibraryGUI {
                         noDataLabel.setVisible(false);
                         resultTable.setVisible(true);
                     }
-                    panel1.revalidate();
-                    panel1.repaint();
-                    frame.repaint();
+                    mainPanel.revalidate();
+                    mainPanel.repaint();
+
                 } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(frame, "Error executing search: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(mainPanel, "Error executing search: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
 
-        // Make the frame visible
-        frame.setVisible(true);
+
     }
 }
