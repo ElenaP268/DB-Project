@@ -1,3 +1,5 @@
+import javax.swing.*;
+import java.awt.*;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
@@ -38,7 +40,7 @@ public class LibraryManagement {
         searchTerm = "%" + searchTerm + "%";
         String query = "SELECT B.Isbn AS ISBN, B.Title AS TITLE, A.Name AS AUTHORS, "+
                         "CASE WHEN BL.Date_in IS NULL AND BL.Date_out IS NOT NULL THEN 'Checked Out' ELSE 'Available' END AS STATUS, "+
-                        "BL.Loan_id AS BORROWER "+
+                        "BL.Card_id AS BORROWER "+
                         "FROM BOOK AS B LEFT JOIN BOOK_AUTHORS AS BA ON B.Isbn = BA.Isbn "+
                         "LEFT JOIN AUTHORS AS A ON BA.Author_id = A.Author_id "+
                         "LEFT JOIN BOOK_LOANS AS BL ON B.Isbn = BL.Isbn "+
@@ -147,13 +149,20 @@ public class LibraryManagement {
         return searchResult;
     }
 
-    public static void checkoutFromIsbn(Connection conn, String isbn) throws SQLException {
-        String borrowerID = getBorrowerID();
-        checkout(conn, isbn, borrowerID);
+    public static void checkoutFromIsbn(Connection conn, String isbn, Component parentComponent) throws SQLException {
+        String borrowerID = getBorrowerID(parentComponent);
+        if(borrowerID != null && !borrowerID.trim().isEmpty()) {
+            String errorMessage = checkout(conn, isbn, borrowerID);
+            if(!errorMessage.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(parentComponent,  errorMessage, "Checkout Error", JOptionPane.WARNING_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(parentComponent,  "Successfully checked out book", "Checkout Success", JOptionPane.PLAIN_MESSAGE);
+            }
+        }
     }
 
-    public static void checkoutFromSearch(Connection conn, ArrayList<ListRow> searchResult) throws SQLException {
-        String borrowerID = getBorrowerID();
+    public static void checkoutFromSearch(Connection conn, ArrayList<ListRow> searchResult, Component parentComponent) throws SQLException {
+        String borrowerID = getBorrowerID(parentComponent);
 
         for (ListRow row : searchResult) {
             if (row.checked())
@@ -161,19 +170,28 @@ public class LibraryManagement {
         }
     }
 
-    public static void checkout(Connection conn, String isbn, String borrowerID) throws SQLException {
+    public static String checkout(Connection conn, String isbn, String borrowerID) throws SQLException {
         // checkout and add info to book_loans
+        String errorMessage = "";
+        if( !isValidBorrower(conn, borrowerID)) {
+            errorMessage = "Borrower with card id " + borrowerID + " do not exist.";
+            printError(errorMessage);
+            return errorMessage;
+        }
         if (isCheckedOut(conn, isbn)) {
-            printError("Book with ISBN " + isbn + " is already checked out.");
-            return;
+            errorMessage = "Book with ISBN " + isbn + " is already checked out.";
+            printError(errorMessage);
+            return errorMessage;
         }
         if (borrowerLimitReached(conn, borrowerID)) {
-            printError("Borrower already has three books checked out.");
-            return;
+            errorMessage = "Borrower already has three books checked out.";
+            printError(errorMessage);
+            return errorMessage;
         }
         if (borrowerHasFines(conn, borrowerID)) {
-            printError("Borrower has unpaid fines, cannot check out more books.");
-            return;
+            errorMessage = "Borrower has unpaid fines, cannot check out more books.";
+            printError(errorMessage);
+            return errorMessage;
         }
 
         String query = "INSERT INTO BOOK_LOANS (Loan_id, Card_id, Isbn, Date_out, Due_date) " +
@@ -190,12 +208,21 @@ public class LibraryManagement {
         st.setInt(1, generateLoanID(conn));
         st.setString(2, borrowerID);
         st.setString(3, isbn);
-        st.executeUpdate();
+        int count = st.executeUpdate();
+        if(count <= 0) {
+            errorMessage = "Could not checkout book. Unknown Error.";
+        }
+        return errorMessage;
     }
 
-    public static String getBorrowerID() {
-        String borrowerID = "ID001002";
+    public static String getBorrowerID(Component parentComponent) {
+        String borrowerID = "";
         //prompt user for borrower ID
+        while(borrowerID.equalsIgnoreCase("")) {
+            borrowerID = JOptionPane.showInputDialog(parentComponent, "Enter your Card ID:", "Card Input Dialog", JOptionPane.QUESTION_MESSAGE);
+            if (borrowerID == null) break;
+        }
+
         return borrowerID;
     }
 
@@ -226,6 +253,12 @@ public class LibraryManagement {
 
         rs.next();
         return rs.getInt(1) >= 3; // True if borrower has reached borrow limit
+    }
+    public static boolean isValidBorrower(Connection conn, String borrowerID) throws SQLException {
+        Statement st = conn.createStatement();
+        ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM BORROWER WHERE Card_id = '" + borrowerID + "'");
+        rs.next();
+        return rs.getInt(1) == 1; // True if borrower has reached borrow limit
     }
 
     public static boolean borrowerHasFines(Connection conn, String borrowerID) throws SQLException {

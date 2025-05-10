@@ -116,7 +116,35 @@ public class LibraryGUI {
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         JLabel noDataLabel = new JLabel("No record found", SwingConstants.CENTER);
         resultTable.setModel(new DefaultTableModel(new String[][]{}, ListRowBook.getHeaderColumnNames()));
+        resultTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JPanel footerPanel = new JPanel(new GridLayout(1,3));
+        JButton checkoutButton = new JButton("Checkout Selected Book");
+        checkoutButton.setMaximumSize(new Dimension(100, 20));
+        footerPanel.add(new JPanel());
+        footerPanel.add(checkoutButton);
+        footerPanel.add(new JPanel());
+        checkoutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(resultTable.getSelectedRow() >= 0) {
+                    String status = resultTable.getValueAt(resultTable.getSelectedRow(), 3).toString();
+                    if (status.equalsIgnoreCase("Available")) {
+                        String isbn =  resultTable.getValueAt(resultTable.getSelectedRow(), 0).toString();
+                        try {
+                            LibraryManagement.checkoutFromIsbn(conn, isbn, mainPanel);
+                        } catch (SQLException ex) {
+                            JOptionPane.showMessageDialog(mainPanel, "Failed to do database operation. Error:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(mainPanel, "The selected book is not available for checkout.", "Book Not Available", JOptionPane.WARNING_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(mainPanel, "Please select a book to checkout.", "Warning", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
 
+        mainPanel.add(footerPanel, BorderLayout.SOUTH);
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
