@@ -30,7 +30,7 @@ public class BookLoansGui {
 
 
         // Add a label and text field for search input
-        JLabel searchLabel = new JLabel("Enter search term:");
+        JLabel searchLabel = new JLabel("Enter borrower ID:");
         JTextField searchField = new JTextField("", 80);
 
         JButton searchButton = new JButton("Search");
@@ -103,7 +103,7 @@ public class BookLoansGui {
                     // Call the search method and display results
                     ArrayList<ListRow> searchResult = LibraryManagement.loanSearch(conn, searchTerm);
                     if (searchResult.isEmpty()) {
-                        JOptionPane.showMessageDialog(mainPanel, "No Records Found for the search criteria", "No Records Found", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(mainPanel, "Borrower has no active loans.", "No Records Found", JOptionPane.INFORMATION_MESSAGE);
 
                     } else {
                         // Append the header to the result area
