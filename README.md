@@ -28,7 +28,8 @@ How to load data (method 2 - command line)
 4. In the data loading script, update the file path to match the new directory.
 5. Open the command line and run the script.
 
+## Optional: Enable Automatic Login
+1. Replace the placeholder password in Config.java with your actual MySQL password.
+
 ## Launching the GUI
-1. Before launching the interface, replace the placeholder password in Config.java with your actual MySQL password.
-2. 
-(ADD INSTRUCTIONS)
+1. Run db-interface.jar using an up-to-date version of Java.
