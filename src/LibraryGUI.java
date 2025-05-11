@@ -96,7 +96,7 @@ public class LibraryGUI {
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         JLabel noDataLabel = new JLabel("No record found", SwingConstants.CENTER);
         resultTable.setModel(new DefaultTableModel(new String[][]{}, ListRowBook.getHeaderColumnNames()));
-        resultTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        resultTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         JPanel footerPanel = new JPanel(new GridLayout(1,3));
         JButton checkoutButton = new JButton("Checkout Selected Book");
         checkoutButton.setMaximumSize(new Dimension(100, 20));
@@ -107,16 +107,23 @@ public class LibraryGUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(resultTable.getSelectedRow() >= 0) {
-                    String status = resultTable.getValueAt(resultTable.getSelectedRow(), 3).toString();
-                    if (status.equalsIgnoreCase("Available")) {
-                        String isbn =  resultTable.getValueAt(resultTable.getSelectedRow(), 0).toString();
-                        try {
-                            LibraryManagement.checkoutFromIsbn(conn, isbn, mainPanel);
-                        } catch (SQLException ex) {
-                            JOptionPane.showMessageDialog(mainPanel, "Failed to do database operation. Error:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    String borrowerID = null;
+                    boolean checkoutSuccess = true;
+                    for (int i = 0; i < resultTable.getSelectedRowCount() && i < 4 && checkoutSuccess; i++) {
+                        String status = resultTable.getValueAt(resultTable.getSelectedRows()[i], 3).toString();
+                        if (status.equalsIgnoreCase("Available")) {
+                            String isbn = resultTable.getValueAt(resultTable.getSelectedRows()[i], 0).toString();
+                            try {
+                                if (borrowerID == null) {
+                                    borrowerID = LibraryManagement.getBorrowerID(mainPanel);
+                                }
+                                checkoutSuccess = LibraryManagement.checkoutFromIsbn(conn, isbn, borrowerID, mainPanel);
+                            } catch (SQLException ex) {
+                                JOptionPane.showMessageDialog(mainPanel, "Failed to do database operation. Error:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(mainPanel, "The selected book is not available for checkout.", "Book Not Available", JOptionPane.WARNING_MESSAGE);
                         }
-                    } else {
-                        JOptionPane.showMessageDialog(mainPanel, "The selected book is not available for checkout.", "Book Not Available", JOptionPane.WARNING_MESSAGE);
                     }
                 } else {
                     JOptionPane.showMessageDialog(mainPanel, "Please select a book to checkout.", "Warning", JOptionPane.WARNING_MESSAGE);
