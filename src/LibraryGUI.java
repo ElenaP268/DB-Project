@@ -48,7 +48,7 @@ public class LibraryGUI {
         JPanel panel1 = new JPanel(new BorderLayout());
 
         tabbedPane.add("Book Search and Availability", panel1);
-        JPanel panel2 = new JPanel();
+        JPanel panel2 = new JPanel(new BorderLayout());
         tabbedPane.add("Book Loans", panel2);
         BookLoansGui bookLoansGui = new BookLoansGui(panel2, conn);
 
