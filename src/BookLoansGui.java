@@ -74,26 +74,17 @@ public class BookLoansGui {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(resultTable.getSelectedRow() >= 0) {
-                    String borrowerID = null;
                     boolean checkinSuccess = true;
                     for (int i = 0; i < resultTable.getSelectedRowCount() && i < 4 && checkinSuccess; i++) {
-                        String status = resultTable.getValueAt(resultTable.getSelectedRows()[i], 3).toString();
-                        if (status.equalsIgnoreCase("Available")) {
-                            String isbn = resultTable.getValueAt(resultTable.getSelectedRows()[i], 0).toString();
-                            try {
-                                if (borrowerID == null) {
-                                    borrowerID = LibraryManagement.getBorrowerID(mainPanel);
-                                }
-                                checkinSuccess = LibraryManagement.checkoutFromIsbn(conn, isbn, borrowerID, mainPanel);
-                            } catch (SQLException ex) {
-                                JOptionPane.showMessageDialog(mainPanel, "Failed to do database operation. Error:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                            }
-                        } else {
-                            JOptionPane.showMessageDialog(mainPanel, "The selected book is not available for checkout.", "Book Not Available", JOptionPane.WARNING_MESSAGE);
+                        String loanID = resultTable.getValueAt(resultTable.getSelectedRows()[i], 0).toString();
+                        try {
+                            checkinSuccess = LibraryManagement.checkIn(conn, loanID, mainPanel);
+                        } catch (SQLException ex) {
+                            JOptionPane.showMessageDialog(mainPanel, "Failed to do database operation. Error:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 } else {
-                    JOptionPane.showMessageDialog(mainPanel, "Please select a book to checkout.", "Warning", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(mainPanel, "Please select a book to checkin.", "Warning", JOptionPane.WARNING_MESSAGE);
                 }
             }
         });

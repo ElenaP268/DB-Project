@@ -40,7 +40,7 @@ public class LibraryManagement {
         searchTerm = "%" + searchTerm + "%";
         String query = "SELECT B.Isbn AS ISBN, B.Title AS TITLE, A.Name AS AUTHORS, "+
                         "CASE WHEN BL.Date_in IS NULL AND BL.Date_out IS NOT NULL THEN 'Checked Out' ELSE 'Available' END AS STATUS, "+
-                        "BL.Card_id AS BORROWER "+
+                        "CASE WHEN BL.Date_in IS NOT NULL THEN NULL ELSE BL.Card_id END AS BORROWER "+
                         "FROM BOOK AS B LEFT JOIN BOOK_AUTHORS AS BA ON B.Isbn = BA.Isbn "+
                         "LEFT JOIN AUTHORS AS A ON BA.Author_id = A.Author_id "+
                         "LEFT JOIN BOOK_LOANS AS BL ON B.Isbn = BL.Isbn "+
@@ -263,17 +263,25 @@ public class LibraryManagement {
         return rs.next(); // True if borrower has unpaid fines
     }
 
-    public static void checkInFromSearch(Connection conn, ArrayList<ListRow> searchResult) throws SQLException {
+    public static void checkInFromSearch(Connection conn, ArrayList<ListRow> searchResult, Component parentComponent) throws SQLException {
         for (ListRow row : searchResult) {
             if (row.checked())
-                checkIn(conn, row.getKey());
+                checkIn(conn, row.getKey(), parentComponent);
         }
     }
 
-    public static void checkIn(Connection conn, String loanID) throws SQLException {
+    public static boolean checkIn(Connection conn, String loanID, Component parentComponent) throws SQLException {
         String query = "UPDATE BOOK_LOANS SET Date_in = CURRENT_DATE WHERE Loan_id = " + loanID + " AND Date_in IS NULL;";
         Statement st = conn.createStatement();
-        st.executeUpdate(query);
+        int count = st.executeUpdate(query);
+        if(count <= 0) {
+            JOptionPane.showMessageDialog(parentComponent,  "", "Checkin Error", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        else {
+            JOptionPane.showMessageDialog(parentComponent,  "Successfully checked in book", "Checkin Success", JOptionPane.PLAIN_MESSAGE);
+            return true;
+        }
     }
 
     public static void updateFines(Connection conn) throws SQLException {
