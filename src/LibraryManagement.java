@@ -244,7 +244,7 @@ public class LibraryManagement {
 
     public static boolean isCheckedOut(Connection conn, String isbn) throws SQLException {
         Statement st = conn.createStatement();
-        ResultSet rs = st.executeQuery("SELECT 1 FROM BOOK_LOANS bl, BOOK bk WHERE bl.Isbn = bk.Isbn AND bl.Date_in IS NULL AND bk.isbn = " + isbn + ";");
+        ResultSet rs = st.executeQuery("SELECT 1 FROM BOOK_LOANS bl, BOOK bk WHERE bl.Isbn = bk.Isbn AND bl.Date_in IS NULL AND bk.isbn = '" + isbn + "';");
 
         return rs.next(); // True if the books is already in the loan list
     }
