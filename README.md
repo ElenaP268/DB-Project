@@ -1,10 +1,12 @@
 # DB-Project
 
-## Dependencies
-(ADD SPECIFIC SOFTWARE AND VERSIONS)
+## Technical Dependencies
+- Java (guaranteed to work on version 24 and newer)
+- JDBC
+- MySQL 
 
 ## Creating the Database
-1. Launch MySQL with appropriate login credentials.
+1. Launch MySQL with appropriate login credentials for your machine.
 2. Create the empty database by running Library_DB.sql. This will overwrite any existing 'library' database.
 3. Put all CSV files into the file path in Library_DB_DataLoad.sql (ex: C:\db_project\data\example.csv)
 4. Run the Library_DB_DataLoad file using one of the two methods below:
@@ -27,4 +29,6 @@ How to load data (method 2 - command line)
 5. Open the command line and run the script.
 
 ## Launching the GUI
+1. Before launching the interface, replace the placeholder password in Config.java with your actual MySQL password.
+2. 
 (ADD INSTRUCTIONS)
