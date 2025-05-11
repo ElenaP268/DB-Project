@@ -97,12 +97,45 @@ public class LibraryGUI {
         JLabel noDataLabel = new JLabel("No record found", SwingConstants.CENTER);
         resultTable.setModel(new DefaultTableModel(new String[][]{}, ListRowBook.getHeaderColumnNames()));
         resultTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        JPanel footerPanel = new JPanel(new GridLayout(1,3));
+        JPanel footerPanel = new JPanel(new GridLayout(1,4, 5,5));
         JButton checkoutButton = new JButton("Checkout Selected Book");
+        JButton isbnCheckoutButton = new JButton("Checkout using ISBN");
         checkoutButton.setMaximumSize(new Dimension(100, 20));
         footerPanel.add(new JPanel());
+        footerPanel.add(isbnCheckoutButton);
         footerPanel.add(checkoutButton);
         footerPanel.add(new JPanel());
+
+        JPanel isbnpanel = new JPanel();
+        JTextField isbnField = new JTextField(20);
+        JTextField cardFIeld = new JTextField(20);
+        isbnpanel.setLayout(new java.awt.GridLayout(2, 2,10,10)); // Arrange components in 2 rows
+        isbnpanel.add(new JLabel("Enter ISBN Number:"));
+        isbnpanel.add(isbnField);
+        isbnpanel.add(new JLabel("Enter Card Id:"));
+        isbnpanel.add(cardFIeld);
+        isbnField.setVisible(true);
+
+
+        isbnCheckoutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int result = JOptionPane.showConfirmDialog(mainPanel, isbnpanel, "Checkout using ISBN",
+                        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                String borrowerID = null;
+                boolean checkoutSuccess = true;
+                if (result == JOptionPane.OK_OPTION) {
+                    String isbn = isbnField.getText();
+                    borrowerID = cardFIeld.getText();
+                    try {
+                        checkoutSuccess = LibraryManagement.checkoutFromIsbn(conn, isbn, borrowerID, mainPanel);
+                    } catch (SQLException ex) {
+                        JOptionPane.showMessageDialog(mainPanel, "Failed to do database operation. Error:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+
         checkoutButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
