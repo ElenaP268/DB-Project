@@ -292,34 +292,38 @@ public class LibraryManagement {
             else
                 newFineAmt = intervalToDateIn.multiply(new BigDecimal("0.25"));
 
-            int loanID = rs.getInt(3);
-            BigDecimal fineAmt = rs.getBigDecimal(4);
-            boolean paid = rs.getBoolean(5);
+            if (newFineAmt.compareTo(new BigDecimal("0")) > 0) {
+                int loanID = rs.getInt(3);
+                BigDecimal fineAmt = rs.getBigDecimal(4);
+                boolean paid = rs.getBoolean(5);
 
-            if (rs.wasNull()) { // Needs new entry in Fines
-                String query2 = "INSERT INTO Fines (Loan_id, Fine_amt, Paid) VALUES (?, ?, 0);";
-                PreparedStatement st2 = conn.prepareStatement(query2);
+                if (rs.wasNull()) { // Needs new entry in Fines
+                    String query2 = "INSERT INTO Fines (Loan_id, Fine_amt, Paid) VALUES (?, ?, 0);";
+                    PreparedStatement st2 = conn.prepareStatement(query2);
 
-                System.out.print(loanID + ", " + newFineAmt);
-                st2.setInt(1, loanID);
-                st2.setBigDecimal(2, newFineAmt);
+                    System.out.print(loanID + ", " + newFineAmt);
+                    st2.setInt(1, loanID);
+                    st2.setBigDecimal(2, newFineAmt);
 
-                st2.executeUpdate();
+                    st2.executeUpdate();
 
-                System.out.println("Added loan " + loanID + " as " + newFineAmt);
+                    System.out.println("Added loan " + loanID + " as " + newFineAmt);
+                }
+                else if (!paid && !fineAmt.equals(newFineAmt)) { // Needs updated entry in Fines
+                    String query2 = "UPDATE Fines SET Fine_amt = ? WHERE Loan_id = ?;";
+                    PreparedStatement st2 = conn.prepareStatement(query2);
+
+                    st2.setBigDecimal(1, newFineAmt);
+                    st2.setInt(2, loanID);
+
+                    System.out.println(loanID + ", " + newFineAmt);
+                    st2.executeUpdate();
+
+                    System.out.println("Set loan " + loanID + " to " + newFineAmt);
+                }
             }
-            else if (!paid && !fineAmt.equals(newFineAmt)) { // Needs updated entry in Fines
-                String query2 = "UPDATE Fines SET Fine_amt = ? WHERE Loan_id = ?;";
-                PreparedStatement st2 = conn.prepareStatement(query2);
 
-                st2.setBigDecimal(1, newFineAmt);
-                st2.setInt(2, loanID);
 
-                System.out.println(loanID + ", " + newFineAmt);
-                st2.executeUpdate();
-
-                System.out.println("Set loan " + loanID + " to " + newFineAmt);
-            }
         }
     }
 
@@ -336,32 +340,32 @@ public class LibraryManagement {
         return searchResult;
     }
 
-    public static void payFinesFromSearch(Connection conn, ArrayList<ListRow> searchResult) throws SQLException {
-        for (ListRow row : searchResult) {
-            if (row.checked())
-                payFines(conn, row.getKey());
+    public static void payFines(Connection conn, String cardID, Component parentComponent) throws SQLException {
+        if(cardID != null && !cardID.trim().isEmpty()) {
+            String query = "SELECT Loan_id FROM Book_loans WHERE Card_id = ? AND Date_in IS NULL;";
+
+            PreparedStatement st = conn.prepareStatement(query);
+            st.setString(1, cardID);
+
+            ResultSet rs = st.executeQuery();
+
+            if(rs.next()){
+                String errorMessage = "Cannot pay fines for unreturned books.";
+                JOptionPane.showMessageDialog(parentComponent,  errorMessage, "Fine Payment Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            query = "UPDATE Fines SET Paid = TRUE WHERE Loan_id IN(SELECT Loan_id FROM Book_Loans WHERE Card_id = ?);";
+            PreparedStatement st2 = conn.prepareStatement(query);
+
+            st2.setString(1, cardID);
+
+            st2.executeUpdate();
+
+            JOptionPane.showMessageDialog(parentComponent,  "Successfully paid borrower fines.", "Fine Payment Success", JOptionPane.PLAIN_MESSAGE);
+
         }
-    }
 
-    public static void payFines(Connection conn, String cardID) throws SQLException {
-        String query = "SELECT Loan_id FROM Book_loans WHERE Card_id = ? AND Date_in IS NULL;";
-
-        PreparedStatement st = conn.prepareStatement(query);
-        st.setString(1, cardID);
-
-        ResultSet rs = st.executeQuery();
-
-        if(rs.next()){
-            printError("Cannot pay fines for unreturned books.");
-            return;
-        }
-
-        query = "UPDATE Fines SET Paid = TRUE WHERE Loan_id IN(SELECT Loan_id FROM Book_Loans WHERE Card_id = ?);";
-        PreparedStatement st2 = conn.prepareStatement(query);
-
-        st2.setString(1, cardID);
-
-        st2.executeUpdate();
     }
 
     public static void printError(String error) {
