@@ -9,20 +9,33 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static java.lang.System.exit;
 
 public class LibraryGUI {
 
     private static Connection conn;
+    private static boolean dbLoginEnabled = false;
+    private String userName = "";
+    private String password = "";
+
+
     public static void main(String[] args) {
         JFrame frame = new JFrame("Library Management System");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         // Set up the database connection
+        LibraryGUI libraryGUI = new LibraryGUI();
+        libraryGUI.doLogin();
 
         try {
-            conn = DriverManager.getConnection(Config.DB_URL, Config.USERNAME, Config.PASSWORD);
+            if (dbLoginEnabled) {
+                conn = DriverManager.getConnection(Config.DB_URL, libraryGUI.userName, libraryGUI.password);
+            } else
+            {
+                conn = DriverManager.getConnection(Config.DB_URL, Config.USERNAME, Config.PASSWORD);
+            }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(frame, "Failed to connect to the database. Error:" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             exit(999);
@@ -33,7 +46,6 @@ public class LibraryGUI {
 
         JTabbedPane tabbedPane = new JTabbedPane();
         JPanel panel1 = new JPanel(new BorderLayout());
-        LibraryGUI libraryGUI = new LibraryGUI();
 
         tabbedPane.add("Book Search and Availability", panel1);
         JPanel panel2 = new JPanel();
@@ -50,8 +62,8 @@ public class LibraryGUI {
         frame.add(tabbedPane, BorderLayout.CENTER);
 
 
-
         libraryGUI.show(panel1);
+
         // Make the frame visible
         frame.setVisible(true);
         frame.repaint();
@@ -202,6 +214,44 @@ public class LibraryGUI {
             }
         });
 
-
     }
+    public boolean doLogin()
+    {
+        JPanel loginpanel = new JPanel();
+        JTextField userField = new JTextField(Config.USERNAME, 20);
+        JPasswordField passwordFIeld = new JPasswordField(Config.PASSWORD, 20);
+        JCheckBox enableDB = new JCheckBox();
+        enableDB.setSelected(true);
+        loginpanel.setLayout(new java.awt.GridLayout(3, 2,10,10)); // Arrange components in 2 rows
+        loginpanel.add(new JLabel("Enable Login with Database User: "));
+        loginpanel.add(enableDB);
+        loginpanel.add(new JLabel("Enter User Id:"));
+        loginpanel.add(userField);
+        loginpanel.add(new JLabel("Enter Password:"));
+        loginpanel.add(passwordFIeld);
+
+
+        int result = JOptionPane.showConfirmDialog(null, loginpanel, "Login to the Library Application",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        dbLoginEnabled = enableDB.isSelected();
+        if (result == JOptionPane.OK_OPTION) {
+            if(enableDB.isSelected()) {
+                String userId = userField.getText();
+                password = new String(passwordFIeld.getPassword());
+
+                userName = userField.getText();
+                password = new String(passwordFIeld.getPassword());
+            }
+            else {
+                userName = Config.USERNAME;
+                password = Config.PASSWORD;
+            }
+        } else {
+            exit(2);
+        }
+
+        return true;
+    }
+
+
 }
