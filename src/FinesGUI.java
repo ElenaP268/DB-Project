@@ -26,15 +26,8 @@ public class FinesGUI {
     }
 
     private void loadAllControls() throws ParseException {
-        // Add FINES title
-        JLabel titleLabel = new JLabel("FINES", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setBorder(new EmptyBorder(10, 20, 10, 20));
-        finesGui.add(titleLabel, BorderLayout.NORTH);
-        JPanel panel = new JPanel(new BorderLayout());
-
-
         // Add button to show fines
+        JPanel panel = new JPanel(new BorderLayout());
         JButton searchButton = new JButton("View Current Fines");
         searchButton.setSize(50,15);
         panel.add(searchButton, BorderLayout.WEST);
