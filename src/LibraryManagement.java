@@ -151,25 +151,18 @@ public class LibraryManagement {
         return searchResult;
     }
 
-    public static void checkoutFromIsbn(Connection conn, String isbn, Component parentComponent) throws SQLException {
-        String borrowerID = getBorrowerID(parentComponent);
+    public static boolean checkoutFromIsbn(Connection conn, String isbn, String borrowerID, Component parentComponent) throws SQLException {
         if(borrowerID != null && !borrowerID.trim().isEmpty()) {
             String errorMessage = checkout(conn, isbn, borrowerID);
             if(!errorMessage.trim().isEmpty()) {
                 JOptionPane.showMessageDialog(parentComponent,  errorMessage, "Checkout Error", JOptionPane.WARNING_MESSAGE);
+                return false;
             } else {
                 JOptionPane.showMessageDialog(parentComponent,  "Successfully checked out book", "Checkout Success", JOptionPane.PLAIN_MESSAGE);
+                return true;
             }
         }
-    }
-
-    public static void checkoutFromSearch(Connection conn, ArrayList<ListRow> searchResult, Component parentComponent) throws SQLException {
-        String borrowerID = getBorrowerID(parentComponent);
-
-        for (ListRow row : searchResult) {
-            if (row.checked())
-                checkout(conn, row.getKey(), borrowerID);
-        }
+        return false;
     }
 
     public static String checkout(Connection conn, String isbn, String borrowerID) throws SQLException {
