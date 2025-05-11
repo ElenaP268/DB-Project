@@ -44,7 +44,8 @@ public class LibraryManagement {
                         "FROM BOOK AS B LEFT JOIN BOOK_AUTHORS AS BA ON B.Isbn = BA.Isbn "+
                         "LEFT JOIN AUTHORS AS A ON BA.Author_id = A.Author_id "+
                         "LEFT JOIN BOOK_LOANS AS BL ON B.Isbn = BL.Isbn "+
-                        "WHERE B.Isbn LIKE ? OR B.Title LIKE ? OR A.Name LIKE ?;";
+                        "WHERE B.Isbn LIKE ? OR B.Title LIKE ? OR A.Name LIKE ? " + 
+                        "ORDER BY B.Isbn;";
 
         PreparedStatement st = conn.prepareStatement(query);
 
